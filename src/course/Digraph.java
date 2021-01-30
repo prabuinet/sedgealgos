@@ -53,7 +53,11 @@ public class Digraph {
 	}
 	
 	public Digraph reverse() {
-		return null;
+		Digraph r = new Digraph(V);
+		for(int v = 0; v < V; v++)
+			for(int w: adj[v])
+				r.addEdge(w, v);
+		return r;
 	}
 	
 	private static class DirectedDFS
@@ -69,6 +73,58 @@ public class Digraph {
 			marked[v] = true;
 			for(int w : G.adj(v)) 
 				if(!marked[w]) dfs(G, w);
+		}
+		
+		public boolean visited(int v) {
+			return marked[v];
+		}
+	}
+	
+	private static class DirectedCycle
+	{
+		private boolean[] marked;
+		private int[] edgeTo;
+		private Stack<Integer> cycle;
+		private boolean[] onStack;
+		
+		public DirectedCycle(Digraph G) {
+			marked = new boolean[G.V()];
+			onStack = new boolean[G.V()];
+			edgeTo = new int[G.V()];
+			for(int v = 0; v < G.V(); v++)
+				if(!marked[v]) dfs(G, v);
+		}
+		
+		private void dfs(Digraph G, int v) { 
+			onStack[v] = true;
+			marked[v] = true;
+			
+			for(int w : G.adj(v)) { 
+				
+				if(this.hasCycle()) return;
+				
+				else if(!marked[w]) { 
+					edgeTo[w] = v;
+					dfs(G, w);
+				}
+				else if(onStack[w]) {
+					cycle = new Stack<Integer>();
+					for(int x = v; x != w; x = edgeTo[x])
+						cycle.push(x);
+					cycle.push(w);
+					cycle.push(v);
+				}
+			}
+			
+			onStack[v] = false;
+		}
+		
+		public Iterable<Integer> cycle() {
+			return cycle;
+		}
+		
+		public boolean hasCycle() {
+			return cycle != null;
 		}
 		
 		public boolean visited(int v) {
@@ -115,6 +171,13 @@ public class Digraph {
 		for(int v = 0; v < G.V(); v++) 
 			for(int w : G.adj(v))
 				StdOut.println(v + "->" + w);
+		
+		DirectedCycle cycle = new DirectedCycle(G);
+		if(cycle.hasCycle())
+			for(int v : cycle.cycle())
+				StdOut.print(v + " ");
+	
+		StdOut.println();
 		
 		TopologicalSort ts = new TopologicalSort(G);
 		for(int v: ts.reversePost())

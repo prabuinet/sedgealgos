@@ -6,7 +6,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class EdgeWeightedGraph {
 
-	private static class Edge implements Comparable<Edge> {
+	public static class Edge implements Comparable<Edge> {
 		final int v;
 		final int w; 
 		final double weight;
